@@ -2,7 +2,7 @@ group 'com.runt9'
 version '0.0.1'
 
 buildscript {
-    ext.kotlin_version = '1.1.60'
+    ext.kotlin_version = '1.1.61'
     ext.spring_boot_version = '1.5.4.RELEASE'
 
     repositories {
@@ -34,4 +34,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-actuator'
     compile 'com.h2database:h2:1.4.192'
     compile 'org.springframework.boot:spring-boot-devtools'
+    compile 'org.seleniumhq.selenium:selenium-java:3.7.1'
+    compile 'com.google.guava:guava:22.0'
+//    compile 'com.codeborne:phantomjsdriver:1.4.3'
 }

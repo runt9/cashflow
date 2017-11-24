@@ -1,4 +1,4 @@
-package com.runt9.cashflow.model
+package com.runt9.cashflow.model.entity
 
 import javax.persistence.*
 
@@ -10,5 +10,6 @@ data class Category(
 
         @OneToOne
         val parent: Category? = null,
+
         val name: String = ""
 )

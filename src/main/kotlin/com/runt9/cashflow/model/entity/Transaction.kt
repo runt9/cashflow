@@ -1,6 +1,7 @@
-package com.runt9.cashflow.model
+package com.runt9.cashflow.model.entity
 
 import java.math.BigDecimal
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
@@ -15,5 +16,6 @@ data class Transaction(
         @ManyToOne
         val category: Category? = null,
 
-        val amount: BigDecimal = BigDecimal.ZERO
+        val amount: BigDecimal = BigDecimal.ZERO,
+        val date: LocalDate = LocalDate.now()
 )

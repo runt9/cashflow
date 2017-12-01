@@ -11,11 +11,20 @@ data class Transaction(
         val id: Long = 0,
 
         @ManyToOne
-        val account: Account = Account(),
+        var account: Account = Account(),
 
         @ManyToOne
         val category: Category? = null,
 
-        val amount: BigDecimal = BigDecimal.ZERO,
-        val date: LocalDate = LocalDate.now()
-)
+        @Column(columnDefinition = "Date")
+        var date: LocalDate = LocalDate.now(),
+
+        @Enumerated(EnumType.STRING)
+        var type: Type = Type.Sale,
+
+        var pending: Boolean = false,
+        var vendor: String = "",
+        var amount: BigDecimal = BigDecimal.ZERO
+) {
+        enum class Type { Sale, Payment, Return, Fee, InterestEarned, Income }
+}

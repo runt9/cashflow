@@ -1,10 +1,14 @@
 package com.runt9.cashflow.service
 
 import com.runt9.cashflow.model.dto.BankLogin
+import com.runt9.cashflow.model.entity.Account
 import com.runt9.cashflow.model.entity.Bank
 import com.runt9.cashflow.model.entity.BankType
+import com.runt9.cashflow.model.entity.Transaction
+import com.runt9.cashflow.repository.AccountRepository
 import com.runt9.cashflow.repository.BankRepository
-import com.runt9.cashflow.service.scraper.ScraperFactory
+import com.runt9.cashflow.repository.TransactionRepository
+import com.runt9.cashflow.service.dataGatherer.DataGathererFactory
 import org.apache.tomcat.util.codec.binary.Base64
 import org.springframework.stereotype.Service
 import javax.crypto.Cipher
@@ -12,7 +16,10 @@ import javax.crypto.spec.SecretKeySpec
 
 @Service
 class BankService(
-        private val bankRepository: BankRepository
+        private val bankRepository: BankRepository,
+        private val accountRepository: AccountRepository,
+        private val transactionRepository: TransactionRepository,
+        private val dataGathererFactory: DataGathererFactory
 ) {
     private fun crypt(text: ByteArray, encryptionKey: String, cipherMode: Int): ByteArray {
         val aesKey = SecretKeySpec(encryptionKey.toByteArray(), "AES")
@@ -39,15 +46,29 @@ class BankService(
         return BankLogin(bank.bankType, loginPair.substring(0, loginNameLen), loginPair.substring(loginNameLen))
     }
 
+    // TODO: Full and partial refresh
     fun refreshBanks(encryptionKey: String) {
+        val accounts = ArrayList<Account>()
+
+        // TODO: Remove these and properly update
+        accountRepository.deleteAll()
+        transactionRepository.deleteAll()
+
         val banks = bankRepository.findAll()
         banks
-                .filter { it.bankType == BankType.CHASE }
+                .filter { it.bankType == BankType.CHASE } // TODO: Temporary
                 .forEach {
                     val login = getBankLogin(it, encryptionKey)
-                    val scraper = ScraperFactory.loadScraper(login.bankType)
-                    scraper.login(login.loginName, login.password)
-                    scraper.cleanup()
+                    val dataGatherer = dataGathererFactory.loadDataGatherer(login.bankType)
+                    dataGatherer.login(login.loginName, login.password)
+                    accounts.addAll(dataGatherer.gatherAccounts(it))
+                    // TODO: Create or update
+                    accountRepository.save(accounts)
+                    val transactions = ArrayList<Transaction>()
+                    accounts.forEach {
+                        transactions.addAll(dataGatherer.getAccountTransactions(it))
+                    }
+                    transactionRepository.save(transactions)
                 }
     }
 }

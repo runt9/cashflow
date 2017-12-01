@@ -17,8 +17,9 @@ data class Account(
 
         @OneToMany
         @JoinColumn(name = "account_id")
-        val transactions: List<Transaction> = ArrayList(),
+        var transactions: List<Transaction> = ArrayList(),
 
+        val accountId: Long = 0,
         val name: String = "",
         val balance: BigDecimal = BigDecimal.ZERO
 

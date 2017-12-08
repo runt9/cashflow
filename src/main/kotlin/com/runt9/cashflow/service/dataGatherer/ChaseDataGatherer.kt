@@ -78,6 +78,7 @@ class ChaseDataGatherer(private val restTemplate: RestTemplate) : DataGatherer {
         restTemplate.postForObject("https://secure05b.chase.com/auth/fcc/login", loginRequest, LoginReturn::class.java)
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun gatherAccounts(bank: Bank): List<Account> {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -91,7 +92,7 @@ class ChaseDataGatherer(private val restTemplate: RestTemplate) : DataGatherer {
                     bank = bank,
                     name = it["nickname"] as String,
                     balance = BigDecimal(((it["tileDetail"] as Map<String, Any>)["currentBalance"] as Double).toString()),
-                    accountId = (it["accountId"] as Number).toLong()
+                    accountId = (it["accountId"] as Int).toString()
             )
         }
     }
@@ -102,7 +103,7 @@ class ChaseDataGatherer(private val restTemplate: RestTemplate) : DataGatherer {
         headers.set("x-jpmc-csrf-token", "NONE")
 
         val data = LinkedMultiValueMap<String, String>()
-        data.add("accountId", account.accountId.toString())
+        data.add("accountId", account.accountId)
         data.add("filterTranType", "ALL")
         data.add("statementPeriodId", "ALL")
 

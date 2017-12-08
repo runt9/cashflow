@@ -56,7 +56,7 @@ class BankService(
 
         val banks = bankRepository.findAll()
         banks
-                .filter { it.bankType == BankType.CHASE } // TODO: Temporary
+                .filter { it.bankType == BankType.CAPITALONE_BANK } // TODO: Temporary
                 .forEach {
                     val login = getBankLogin(it, encryptionKey)
                     val dataGatherer = dataGathererFactory.loadDataGatherer(login.bankType)

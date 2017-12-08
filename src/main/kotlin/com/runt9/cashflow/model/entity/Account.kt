@@ -19,7 +19,7 @@ data class Account(
         @JoinColumn(name = "account_id")
         var transactions: List<Transaction> = ArrayList(),
 
-        val accountId: Long = 0,
+        val accountId: String = "",
         val name: String = "",
         val balance: BigDecimal = BigDecimal.ZERO
 

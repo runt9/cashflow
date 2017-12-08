@@ -13,5 +13,6 @@ data class Bank(
         val bankType: BankType = BankType.NONE,
 
         @JsonIgnore
+        @Column(length = 1000)
         var loginData: String = ""
 )

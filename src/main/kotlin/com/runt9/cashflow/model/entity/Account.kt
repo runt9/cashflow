@@ -1,13 +1,14 @@
 package com.runt9.cashflow.model.entity
 
 import java.math.BigDecimal
+import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
 data class Account(
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
-        val id: Long = 0,
+        var id: Long = 0,
 
         @Enumerated(EnumType.STRING)
         val accountType: AccountType = AccountType.NONE,
@@ -21,6 +22,6 @@ data class Account(
 
         val accountId: String = "",
         val name: String = "",
-        val balance: BigDecimal = BigDecimal.ZERO
-
+        val balance: BigDecimal = BigDecimal.ZERO,
+        var lastRefresh: LocalDate? = null
 )

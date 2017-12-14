@@ -1,14 +1,16 @@
 package com.runt9.cashflow.service.dataGatherer
 
+import com.runt9.cashflow.model.RefreshType
 import com.runt9.cashflow.model.entity.Account
 import com.runt9.cashflow.model.entity.AccountType
 import com.runt9.cashflow.model.entity.Bank
 import com.runt9.cashflow.model.entity.Transaction
+import com.runt9.cashflow.service.MerchantService
 import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.Select
 
 
-class ChaseDataGatherer : AbstractDataGatherer() {
+class ChaseDataGatherer(merchantService: MerchantService) : AbstractDataGatherer(merchantService) {
     override fun login(username: String, password: String) {
         driver.get("https://chaseonline.chase.com/Logon.aspx")
         driver.findElement(By.id("UserID")).sendKeys(username)
@@ -36,18 +38,24 @@ class ChaseDataGatherer : AbstractDataGatherer() {
         }
     }
 
-    override fun getAccountTransactions(account: Account): List<Transaction> {
+    override fun getAccountTransactions(account: Account, refreshType: RefreshType): List<Transaction> {
         // TODO: Older transactions
         driver.get("https://cards.chase.com/CC/Account/Activity/${account.accountId}")
         waitForVisibility(By.className("ui-selectmenu-status"))
+
+        Select(driver.findElement(By.id("StatementPeriodQuick"))).selectByValue("ALL")
+        waitForVisibility(By.id("Posted"))
+
         return driver.findElements(By.className("summary")).map {
+            val merchant = it.findElement(By.xpath("td[5]")).text
             return@map Transaction(
                     account = account,
                     date = it.findElement(By.xpath("td[2]")).text.toLocalDate("MM/dd/yyyy"),
                     pending = it.findElement(By.xpath("td[4]")).text == "Pending",
                     type = Transaction.Type.valueOf(it.findElement(By.xpath("td[4]")).text),
-                    vendor = it.findElement(By.xpath("td[5]")).text,
-                    amount = it.findElement(By.xpath("td[7]")).toBigDecimal()
+                    merchant = merchantService.getOrCreateMerchant(merchant),
+                    amount = it.findElement(By.xpath("td[7]")).toBigDecimal(),
+                    category = merchantService.getCategoryForMerchant(merchant)
             )
         }
     }

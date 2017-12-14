@@ -1,5 +1,6 @@
 package com.runt9.cashflow.service.dataGatherer
 
+import com.runt9.cashflow.service.MerchantService
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
@@ -10,7 +11,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-abstract class AbstractDataGatherer : DataGatherer {
+abstract class AbstractDataGatherer(protected val merchantService: MerchantService) : DataGatherer {
     protected val driver: ChromeDriver
 
     init {
@@ -31,4 +32,6 @@ abstract class AbstractDataGatherer : DataGatherer {
     protected fun WebElement.toBigDecimal() = BigDecimal(text.replace(Regex("[^\\d.-]"), ""))
 
     protected fun String.toLocalDate(format: String) = LocalDate.parse(this, DateTimeFormatter.ofPattern(format))!!
+
+    protected fun LocalDate.clamp(date: LocalDate = LocalDate.now()) = if (this.isAfter(date)) date else this
 }

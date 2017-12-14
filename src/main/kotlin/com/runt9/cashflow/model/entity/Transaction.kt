@@ -8,7 +8,7 @@ import javax.persistence.*
 data class Transaction(
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
-        val id: Long = 0,
+        var id: Long = 0,
 
         @ManyToOne
         var account: Account = Account(),
@@ -22,8 +22,10 @@ data class Transaction(
         @Enumerated(EnumType.STRING)
         var type: Type = Type.Sale,
 
+        @ManyToOne
+        var merchant: Merchant = Merchant(),
+
         var pending: Boolean = false,
-        var vendor: String = "",
         var amount: BigDecimal = BigDecimal.ZERO
 ) {
         enum class Type { Sale, Payment, Return, Fee, InterestEarned, Income, Pending }

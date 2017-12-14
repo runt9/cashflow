@@ -1,0 +1,25 @@
+<div class="container">
+    <div ng-if="$ctrl.error"></div>
+    <div ng-if="$ctrl.loading"></div>
+
+    <div ng-if="!$ctrl.loading && !$ctrl.error">
+        <table class="table table-bordered table-striped table-hover">
+            <thead>
+            <tr>
+                <th>Category</th>
+                <th ng-repeat="month in $ctrl.months" ng-bind="month"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="category in $ctrl.categories">
+                <td ng-bind="category"></td>
+                <td ng-repeat="month in $ctrl.months" ng-bind="$ctrl.getData(category, month) | currency"></td>
+            </tr>
+            <tr class="totals-row">
+                <td>Total</td>
+                <td ng-repeat="month in $ctrl.months" ng-bind="$ctrl.getMonthTotal(month) | currency"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

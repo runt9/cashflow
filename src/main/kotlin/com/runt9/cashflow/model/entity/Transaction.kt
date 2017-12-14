@@ -26,5 +26,5 @@ data class Transaction(
         var vendor: String = "",
         var amount: BigDecimal = BigDecimal.ZERO
 ) {
-        enum class Type { Sale, Payment, Return, Fee, InterestEarned, Income }
+        enum class Type { Sale, Payment, Return, Fee, InterestEarned, Income, Pending }
 }

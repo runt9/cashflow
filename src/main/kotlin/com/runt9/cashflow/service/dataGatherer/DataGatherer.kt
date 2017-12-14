@@ -8,4 +8,5 @@ interface DataGatherer {
     fun login(username: String, password: String)
     fun gatherAccounts(bank: Bank): List<Account>
     fun getAccountTransactions(account: Account): List<Transaction>
+    fun cleanup()
 }

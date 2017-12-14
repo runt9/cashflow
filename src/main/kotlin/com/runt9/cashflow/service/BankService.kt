@@ -1,10 +1,7 @@
 package com.runt9.cashflow.service
 
 import com.runt9.cashflow.model.dto.BankLogin
-import com.runt9.cashflow.model.entity.Account
 import com.runt9.cashflow.model.entity.Bank
-import com.runt9.cashflow.model.entity.BankType
-import com.runt9.cashflow.model.entity.Transaction
 import com.runt9.cashflow.repository.AccountRepository
 import com.runt9.cashflow.repository.BankRepository
 import com.runt9.cashflow.repository.TransactionRepository
@@ -33,6 +30,7 @@ class BankService(
 
     fun createBank(loginInfo: BankLogin, encryptionKey: String) {
         // Turns username: foobar, password: bazpizzaz into "6+foobarbazpizzaz" before encrypting it
+        // TODO: Likely needs more salt
         val loginData = encrypt("${loginInfo.loginName.length}+${loginInfo.loginName}${loginInfo.password}", encryptionKey)
         bankRepository.save(Bank(bankType = loginInfo.bankType, loginData = loginData))
     }
@@ -48,27 +46,23 @@ class BankService(
 
     // TODO: Full and partial refresh
     fun refreshBanks(encryptionKey: String) {
-        val accounts = ArrayList<Account>()
-
         // TODO: Remove these and properly update
         accountRepository.deleteAll()
         transactionRepository.deleteAll()
 
         val banks = bankRepository.findAll()
-        banks
-                .filter { it.bankType == BankType.CAPITALONE_BANK } // TODO: Temporary
-                .forEach {
-                    val login = getBankLogin(it, encryptionKey)
-                    val dataGatherer = dataGathererFactory.loadDataGatherer(login.bankType)
-                    dataGatherer.login(login.loginName, login.password)
-                    accounts.addAll(dataGatherer.gatherAccounts(it))
-                    // TODO: Create or update
-                    accountRepository.save(accounts)
-                    val transactions = ArrayList<Transaction>()
-                    accounts.forEach {
-                        transactions.addAll(dataGatherer.getAccountTransactions(it))
-                    }
-                    transactionRepository.save(transactions)
-                }
+        banks.forEach {
+            val login = getBankLogin(it, encryptionKey)
+            val dataGatherer = dataGathererFactory.loadDataGatherer(login.bankType)
+            try {
+                dataGatherer.login(login.loginName, login.password)
+                val accounts = dataGatherer.gatherAccounts(it)
+                // TODO: Create or update
+                accountRepository.save(accounts)
+                transactionRepository.save(accounts.flatMap { dataGatherer.getAccountTransactions(it) })
+            } finally {
+                dataGatherer.cleanup()
+            }
+        }
     }
 }
